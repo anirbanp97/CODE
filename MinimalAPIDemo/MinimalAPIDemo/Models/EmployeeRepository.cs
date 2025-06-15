@@ -53,53 +53,95 @@
     //        return true;
     //    }
     //}
-    private readonly List<Employee> _employeeList = new List<Employee>
+    //private readonly List<Employee> _employeeList = new List<Employee>
+    //    {
+    //        new Employee { Id = 1, Name = "John Doe", Position = "Software Engineer", Salary = 60000 },
+    //        new Employee { Id = 2, Name = "Jane Smith", Position = "Project Manager", Salary = 80000 }
+    //    };
+    //public async Task<List<Employee>> GetAllEmployeesAsync()
+    //{
+    //    //Simulate database call
+    //    await Task.Delay(TimeSpan.FromSeconds(1));
+    //    return _employeeList;
+    //}
+    //public async Task<Employee?> GetEmployeeByIdAsync(int id)
+    //{
+    //    //Simulate database call
+    //    await Task.Delay(TimeSpan.FromSeconds(1));
+    //    var employee = _employeeList.FirstOrDefault(e => e.Id == id);
+    //    return employee;
+    //}
+    //public async Task<Employee> AddEmployeeAsync(Employee newEmployee)
+    //{
+    //    //Simulate database call
+    //    await Task.Delay(TimeSpan.FromSeconds(1));
+    //    newEmployee.Id = _employeeList.Count > 0 ? _employeeList.Max(e => e.Id) + 1 : 1;
+    //    _employeeList.Add(newEmployee);
+    //    return newEmployee;
+    //}
+    //public async Task<Employee?> UpdateEmployeeAsync(int id, Employee updatedEmployee)
+    //{
+    //    //Simulate database call
+    //    await Task.Delay(TimeSpan.FromSeconds(1));
+    //    var employee = _employeeList.FirstOrDefault(e => e.Id == id);
+    //    if (employee == null)
+    //        return null;
+    //    employee.Name = updatedEmployee.Name;
+    //    employee.Position = updatedEmployee.Position;
+    //    employee.Salary = updatedEmployee.Salary;
+    //    return employee;
+    //}
+    //public async Task<bool> DeleteEmployeeAsync(int id)
+    //{
+    //    //Simulate database call
+    //    await Task.Delay(TimeSpan.FromSeconds(1));
+    //    var employee = _employeeList.FirstOrDefault(e => e.Id == id);
+    //    if (employee == null)
+    //        return false;
+    //    _employeeList.Remove(employee);
+    //    return true;
+    //}
+    public class EmployeeRepository : IEmployeeRepository
+    {
+        private readonly ApplicationDbContext _context;
+        public EmployeeRepository(ApplicationDbContext context)
         {
-            new Employee { Id = 1, Name = "John Doe", Position = "Software Engineer", Salary = 60000 },
-            new Employee { Id = 2, Name = "Jane Smith", Position = "Project Manager", Salary = 80000 }
-        };
-    public async Task<List<Employee>> GetAllEmployeesAsync()
-    {
-        //Simulate database call
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        return _employeeList;
-    }
-    public async Task<Employee?> GetEmployeeByIdAsync(int id)
-    {
-        //Simulate database call
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        var employee = _employeeList.FirstOrDefault(e => e.Id == id);
-        return employee;
-    }
-    public async Task<Employee> AddEmployeeAsync(Employee newEmployee)
-    {
-        //Simulate database call
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        newEmployee.Id = _employeeList.Count > 0 ? _employeeList.Max(e => e.Id) + 1 : 1;
-        _employeeList.Add(newEmployee);
-        return newEmployee;
-    }
-    public async Task<Employee?> UpdateEmployeeAsync(int id, Employee updatedEmployee)
-    {
-        //Simulate database call
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        var employee = _employeeList.FirstOrDefault(e => e.Id == id);
-        if (employee == null)
-            return null;
-        employee.Name = updatedEmployee.Name;
-        employee.Position = updatedEmployee.Position;
-        employee.Salary = updatedEmployee.Salary;
-        return employee;
-    }
-    public async Task<bool> DeleteEmployeeAsync(int id)
-    {
-        //Simulate database call
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        var employee = _employeeList.FirstOrDefault(e => e.Id == id);
-        if (employee == null)
-            return false;
-        _employeeList.Remove(employee);
-        return true;
+            _context = context;
+        }
+        public async Task<List<Employee>> GetAllEmployeesAsync()
+        {
+            return await _context.Employees.ToListAsync();
+        }
+        public async Task<Employee?> GetEmployeeByIdAsync(int id)
+        {
+            return await _context.Employees.FindAsync(id);
+        }
+        public async Task<Employee> AddEmployeeAsync(Employee newEmployee)
+        {
+            _context.Employees.Add(newEmployee);
+            await _context.SaveChangesAsync();
+            return newEmployee;
+        }
+        public async Task<Employee?> UpdateEmployeeAsync(int id, Employee updatedEmployee)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+                return null;
+            employee.Name = updatedEmployee.Name;
+            employee.Position = updatedEmployee.Position;
+            employee.Salary = updatedEmployee.Salary;
+            await _context.SaveChangesAsync();
+            return employee;
+        }
+        public async Task<bool> DeleteEmployeeAsync(int id)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+                return false;
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
-}
+
