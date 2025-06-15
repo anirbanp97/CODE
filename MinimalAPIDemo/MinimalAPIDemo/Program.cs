@@ -43,7 +43,8 @@ namespace MinimalAPIDemo
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.MapGet("/v1/employees", () => "Version 1 - Get all employees");
+            app.MapGet("/v2/employees", () => "Version 2 - Get all employees");
             // Register the custom global error handling middleware in the pipeline
             // It will catch exceptions from downstream middleware/endpoints
             app.UseMiddleware<ErrorHandlerMiddleware>();
@@ -97,7 +98,19 @@ namespace MinimalAPIDemo
                 return deleted ? Results.NoContent() : Results.NotFound();
             })
             .AddEndpointFilter<LoggingEndPointFilter>(); //Log the Request Timing
-
+            app.MapGet("/employees", (HttpContext context) =>
+            {
+                var version = context.Request.Query["api-version"];
+                if (version == "1")
+                {
+                    return "Version 1 - Get all employees";
+                }
+                else if (version == "2")
+                {
+                    return "Version 2 - Get all employees";
+                }
+                return "Unknown version";
+            });
             app.Run();
         }
     }
